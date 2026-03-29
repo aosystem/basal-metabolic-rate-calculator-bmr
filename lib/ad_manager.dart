@@ -1,9 +1,16 @@
 import 'dart:async';
 import 'dart:io' show Platform;
 import 'dart:ui';
+
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 class AdManager {
+  //Test IDs
+  //static const String _androidAdUnitId = "ca-app-pub-3940256099942544/6300978111";
+  //static const String _iosAdUnitId     = "ca-app-pub-3940256099942544/2934735716";
+
+  //Production IDs
   static const String _androidAdUnitId = "YOUR_AD_UNIT_ID";
   static const String _iosAdUnitId     = "YOUR_AD_UNIT_ID";
 
@@ -17,7 +24,23 @@ class AdManager {
 
   BannerAd? get bannerAd => _bannerAd;
 
-  Future<void> loadAdaptiveBannerAd(int widthPx, VoidCallback onAdLoaded) async {
+  static Future<void> initForNPA() async {
+    if (kIsWeb) {
+      return;
+    }
+    await MobileAds.instance.updateRequestConfiguration(
+      RequestConfiguration(
+      ),
+    );
+  }
+
+  Future<void> loadAdaptiveBannerAd(
+      int widthPx,
+      VoidCallback onAdLoaded,
+      ) async {
+    if (kIsWeb) {
+      return;
+    }
     _onLoadedCb = onAdLoaded;
     _lastWidthPx = widthPx;
     _retryAttempt = 0;
@@ -26,19 +49,29 @@ class AdManager {
   }
 
   Future<void> _startLoad(int widthPx) async {
+    if (kIsWeb) {
+      return;
+    }
     _bannerAd?.dispose();
 
     AnchoredAdaptiveBannerAdSize? adaptiveSize;
     try {
-      adaptiveSize = await AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(widthPx);
+      adaptiveSize =
+      await AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(
+        widthPx,
+      );
     } catch (_) {
       adaptiveSize = null;
     }
     final AdSize size = adaptiveSize ?? AdSize.fullBanner;
 
+    const adRequest = AdRequest(
+      nonPersonalizedAds: true,
+    );
+
     _bannerAd = BannerAd(
       adUnitId: _adUnitId,
-      request: const AdRequest(),
+      request: adRequest,
       size: size,
       listener: BannerAdListener(
         onAdLoaded: (ad) {
@@ -58,6 +91,9 @@ class AdManager {
   }
 
   void _scheduleRetry() {
+    if (kIsWeb) {
+      return;
+    }
     _retryTimer?.cancel();
     _retryAttempt = (_retryAttempt + 1).clamp(1, 5);
     final seconds = _retryAttempt >= 4 ? 30 : (3 << (_retryAttempt - 1));
@@ -70,5 +106,4 @@ class AdManager {
     _bannerAd?.dispose();
     _retryTimer?.cancel();
   }
-
 }

@@ -41,20 +41,20 @@ class _AdBannerWidgetState extends State<AdBannerWidget> {
           }
           if (_isAdLoaded && bannerAd != null) {
             return Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SizedBox(height: 10),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      SizedBox(
-                        width: bannerAd.size.width.toDouble(),
-                        height: bannerAd.size.height.toDouble(),
-                        child: AdWidget(ad: bannerAd),
-                      ),
-                    ],
-                  )
-                ]
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      width: bannerAd.size.width.toDouble(),
+                      height: bannerAd.size.height.toDouble(),
+                      child: AdWidget(ad: bannerAd),
+                    ),
+                  ],
+                )
+              ]
             );
           } else {
             return const SizedBox.shrink();
